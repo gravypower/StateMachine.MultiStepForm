@@ -1,0 +1,9 @@
+﻿<ul>
+    @foreach (var t in ViewBag.Triggers)
+    {
+        <li>
+            <input type="submit" value="@t" name="trigger" />
+        </li>
+    }
+</ul>
+<input type="hidden" name="State" value="@ViewBag.State"/>
