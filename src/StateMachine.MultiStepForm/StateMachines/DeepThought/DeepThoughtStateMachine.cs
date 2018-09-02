@@ -7,13 +7,13 @@ namespace StateMachine.MultiStepForm.StateMachines.DeepThought
     public class DeepThoughtStateMachine : AbstractStateMachine<State, Trigger>
     {
         private readonly ICommandHandler<SubmitYourQuestion> _submitYourQuestionCommandHandler;
+        public override State DefaultInitialState => State.MeaningOfLife;
 
         public DeepThoughtStateMachine(ICommandHandler<SubmitYourQuestion> submitYourQuestionCommandHandler)
         {
             _submitYourQuestionCommandHandler = submitYourQuestionCommandHandler;
         }
 
-        public override State DefaultInitialState => State.MeaningOfLife;
         protected override void DoConfigureStateMachine()
         {
             var yourQuestionToTheAnswerTrigger = StateMachine.SetTriggerParameters<QuestionViewModel>(Trigger.YourQuestionToTheAnswer);
@@ -31,8 +31,10 @@ namespace StateMachine.MultiStepForm.StateMachines.DeepThought
                 .Permit(Trigger.WhatIsTheQuestion, State.QuestionToTheAnswer);
 
             StateMachine.Configure(State.QuestionToTheAnswer)
-                .OnEntryFrom(yourQuestionToTheAnswerTrigger, YourAnswer)
                 .Permit(Trigger.YourQuestionToTheAnswer, State.SoLongAndThanksForAllTheFish);
+
+            StateMachine.Configure(State.SoLongAndThanksForAllTheFish)
+                .OnEntryFrom(yourQuestionToTheAnswerTrigger, YourAnswer);
         }
 
         public bool CorrectAnswer()

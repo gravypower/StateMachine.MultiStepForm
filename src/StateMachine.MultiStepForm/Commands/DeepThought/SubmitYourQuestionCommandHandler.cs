@@ -6,7 +6,7 @@ namespace StateMachine.MultiStepForm.Commands.DeepThought
     {
         public void Handle(SubmitYourQuestion command)
         {
-            throw new NotImplementedException();
+            //fds
         }
     }
 }
