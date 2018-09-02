@@ -1,5 +1,4 @@
-﻿@model StateMachine.MultiStepForm.Models.DeepThought.QuestionViewModel
-@{
+﻿@{
     ViewData["Title"] = "What is six by seven? ";
 }
 
@@ -8,13 +7,3 @@
 <div>
     <iframe width="681" height="511" src="https://www.youtube.com/embed/bG6b3V2MNxQ?ecver=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 </div>
-
-@using (Html.BeginForm("QuestionToTheAnswer", "DeepThought", FormMethod.Post))
-{
-<div>
-    @Html.LabelFor(m => m.Question)
-    @Html.TextBoxFor(m => m.Question)
-</div>
-
-<partial name="Triggers" />
-}

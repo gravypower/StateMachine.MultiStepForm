@@ -11,6 +11,7 @@ using SimpleInjector.Lifestyles;
 using StateMachine.MultiStepForm.Commands;
 using StateMachine.MultiStepForm.Commands.DeepThought;
 using StateMachine.MultiStepForm.CrossCuttingConcerns;
+using StateMachine.MultiStepForm.MagicStrings;
 using StateMachine.MultiStepForm.StateMachines;
 using StateMachine.MultiStepForm.StateMachines.DeepThought;
 
@@ -88,6 +89,8 @@ namespace StateMachine.MultiStepForm
             _container.Register<AbstractStateMachine<State, Trigger>, DeepThoughtStateMachine>();
 
             _container.RegisterDecorator(typeof(ICommandHandler<>), typeof(VerboseLoggingCommandHandlerDecorator<>));
+
+            _container.Register<IDeepThoughtMagicStrings, DeepThoughtMagicStrings>();
 
             // Allow Simple Injector to resolve services from ASP.NET Core.
             _container.AutoCrossWireAspNetComponents(app);

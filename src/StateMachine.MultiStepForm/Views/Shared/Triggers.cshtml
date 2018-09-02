@@ -1,8 +1,10 @@
 ﻿<ul>
-    @foreach (var t in ViewBag.Triggers)
+    @foreach (TriggerButton t in ViewBag.Triggers)
     {
         <li>
-            <input type="submit" value="@t" name="trigger" />
+            <button name="trigger" type="submit" value="@t.Trigger">
+                @t.TriggerDescription
+            </button>
         </li>
     }
 </ul>
