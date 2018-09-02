@@ -10,15 +10,11 @@ namespace StateMachine.MultiStepForm.StateMachines
         private bool _isConfigured;
 
         protected StateMachine<TState, TTrigger> StateMachine { get; set; }
+        protected IDictionary<TTrigger, object> TriggerArgs { get; } = new Dictionary<TTrigger, object>();
 
-        public TState CurrentState => StateMachine.State;
-
-        private IDictionary<TTrigger, object> _triggerArgs { get; } = new Dictionary<TTrigger, object>();
-
-        public IEnumerable<string> Triggers 
-            => StateMachine.PermittedTriggers.Select(t => t.ToString());
-
+        public IEnumerable<string> Triggers => StateMachine.PermittedTriggers.Select(t => t.ToString());
         public IList<StateMachine<TState, TTrigger>.TriggerWithParameters> TriggersWithParameters { get; }
+        public TState CurrentState => StateMachine.State;
 
         public abstract TState DefaultInitialState { get; }
 
@@ -34,14 +30,6 @@ namespace StateMachine.MultiStepForm.StateMachines
             {
                 throw new ArgumentException("TTrigger must be an enumerated type");
             }
-        }
-
-        protected TArg GetArg<TArg>(TTrigger trigger)
-        {
-            if (_triggerArgs.ContainsKey(trigger))
-                return (TArg)_triggerArgs[trigger];
-
-            return default(TArg);
         }
 
         public void ConfigureStateMachine(TState initialState)
@@ -63,7 +51,7 @@ namespace StateMachine.MultiStepForm.StateMachines
         {
             var t = ParseTrigger(trigger);
 
-            _triggerArgs.Add(t, arg);
+            TriggerArgs.Add(t, arg);
 
             var twp = (StateMachine<TState, TTrigger>.TriggerWithParameters<TArg>) 
                 TriggersWithParameters.SingleOrDefault(x => x.Trigger.Equals(t));
@@ -77,8 +65,6 @@ namespace StateMachine.MultiStepForm.StateMachines
             StateMachine.Fire(t);
         }
 
-        protected abstract void DoConfigureStateMachine();
-
         public TTrigger ParseTrigger(string trigger)
         {
             return (TTrigger)Enum.Parse(typeof(TTrigger), trigger);
@@ -88,5 +74,15 @@ namespace StateMachine.MultiStepForm.StateMachines
         {
             return (TState)Enum.Parse(typeof(TState), state);
         }
+
+        protected TArg GetArg<TArg>(TTrigger trigger)
+        {
+            if (TriggerArgs.ContainsKey(trigger))
+                return (TArg)TriggerArgs[trigger];
+
+            return default(TArg);
+        }
+
+        protected abstract void DoConfigureStateMachine();
     }
 }

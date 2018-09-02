@@ -4,6 +4,7 @@
         <TargetFramework>netcoreapp2.1</TargetFramework>
         <AssemblyName>StateMachine.MultiStepForm</AssemblyName>
         <RootNamespace>StateMachine.MultiStepForm</RootNamespace>
+        <UserSecretsId>f0f7e38d-5d0f-4c56-9cd1-fe832c275182</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>

@@ -1,0 +1,46 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "provider": "filesystem",
+      "library": "node_modules/graphlib-dot/dist/",
+      "destination": "wwwroot/lib/graphlib-dot",
+      "files": [
+        "graphlib-dot.js"
+      ]
+    },
+    {
+      "provider": "filesystem",
+      "library": "node_modules/graphlib-dot/lib/",
+      "destination": "wwwroot/lib/graphlib",
+      "files": [
+        "graphlib.js"
+      ]
+    },
+    {
+      "provider": "filesystem",
+      "library": "node_modules/dagre/dist/",
+      "destination": "wwwroot/lib/dagre",
+      "files": [
+        "dagre.core.js"
+      ]
+    },
+    {
+      "provider": "filesystem",
+      "library": "node_modules/dagre-d3/dist/",
+      "destination": "wwwroot/lib/dagre-d3",
+      "files": [
+        "dagre-d3.core.js"
+      ]
+    },
+    {
+      "provider": "filesystem",
+      "library": "node_modules/lodash/dist/",
+      "destination": "wwwroot/lib/lodash",
+      "files": [
+        "lodash.js"
+      ]
+    }
+  ]
+}

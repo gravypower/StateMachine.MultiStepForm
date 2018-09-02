@@ -13,18 +13,7 @@ namespace StateMachine.MultiStepForm.Controllers
 
         protected TState State
         {
-            get
-            {
-                var state = StateMachine.DefaultInitialState;
-                var tempState = TempData[StateKey];
-
-                if (tempState != null)
-                {
-                    state = (TState)tempState;
-                }
-
-                return state;
-            }
+            get => GetStateFromTempDataOrDefault();
             set => TempData[StateKey] = value;
         }
 
@@ -35,6 +24,7 @@ namespace StateMachine.MultiStepForm.Controllers
             StateMachine = stateMachine;
         }
 
+        [HttpGet]
         public IActionResult Index()
         {
             ViewBag.Triggers = Triggers;
@@ -46,6 +36,20 @@ namespace StateMachine.MultiStepForm.Controllers
         public IActionResult Index(string trigger)
         {
             return FireTrigger(trigger);
+        }
+
+        public override void OnActionExecuting(ActionExecutingContext context)
+        {
+            if (context.HttpContext.Request.Method == "POST")
+            {
+                SetStateFromHiddenField(context);
+            }
+            else
+            {
+                StateMachine.ConfigureStateMachine(State);
+            }
+
+            base.OnActionExecuting(context);
         }
 
         protected IActionResult FireTrigger(string trigger)
@@ -66,27 +70,30 @@ namespace StateMachine.MultiStepForm.Controllers
             return RedirectToAction("Index", ControllerContext.RouteData.Values["controller"].ToString());
         }
 
-        public override void OnActionExecuting(ActionExecutingContext context)
+        private void SetStateFromHiddenField(ActionContext context)
         {
-            if (context.HttpContext.Request.Method == "POST")
+            if (!context.HttpContext.Request.HasFormContentType) return;
+
+            var from = context.HttpContext.Request.Form;
+
+            if (!from.ContainsKey(StateKey)) return;
+
+            var state = StateMachine.ParseState(from[StateKey]);
+            StateMachine.ConfigureStateMachine(state);
+            State = state;
+        }
+
+        private TState GetStateFromTempDataOrDefault()
+        {
+            var state = StateMachine.DefaultInitialState;
+            var tempState = TempData[StateKey];
+
+            if (tempState != null)
             {
-                if (context.HttpContext.Request.HasFormContentType)
-                {
-                    var from = context.HttpContext.Request.Form;
-                    if (from.ContainsKey(StateKey))
-                    {
-                        var state = StateMachine.ParseState(from[StateKey]);
-                        StateMachine.ConfigureStateMachine(state);
-                        State = state;
-                    }
-                }
+                state = (TState)tempState;
             }
-            else
-            {
-                StateMachine.ConfigureStateMachine(State);
-            }
-            
-            base.OnActionExecuting(context);
+
+            return state;
         }
     }
 }
