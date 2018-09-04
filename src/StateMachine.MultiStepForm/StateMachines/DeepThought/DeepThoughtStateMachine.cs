@@ -27,9 +27,6 @@ namespace StateMachine.MultiStepForm.StateMachines.DeepThought
 
         protected override void DoConfigureStateMachine()
         {
-            var yourQuestionToTheAnswerTrigger = StateMachine.SetTriggerParameters<QuestionViewModel>(Trigger.YourQuestionToTheAnswer);
-            TriggersWithParameters.Add(yourQuestionToTheAnswerTrigger);
-
             StateMachine.Configure(State.MeaningOfLife)
                 .PermitIf(Trigger.AskDeepThought, State.CorrectAnswer, CorrectAnswer)
                 .PermitIf(Trigger.AskDeepThought, State.IncorrectAnswer, () => !CorrectAnswer());
@@ -44,6 +41,8 @@ namespace StateMachine.MultiStepForm.StateMachines.DeepThought
             StateMachine.Configure(State.QuestionToTheAnswer)
                 .Permit(Trigger.YourQuestionToTheAnswer, State.SoLongAndThanksForAllTheFish);
 
+            var yourQuestionToTheAnswerTrigger = SetTriggerParameters<QuestionViewModel>(Trigger.YourQuestionToTheAnswer);
+            
             StateMachine.Configure(State.SoLongAndThanksForAllTheFish)
                 .OnEntryFrom(yourQuestionToTheAnswerTrigger, YourAnswer)
                 .OnActivate(GetQuestion);

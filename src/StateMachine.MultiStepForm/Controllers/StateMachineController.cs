@@ -31,9 +31,6 @@ namespace StateMachine.MultiStepForm.Controllers
             ViewBag.State = StateMachine.CurrentState;
             var state = StateMachine.CurrentState.ToString();
             var model = StateMachine.GetModel(StateMachine.CurrentState);
-
-            ViewBag.DotGraph = StateMachine.DotGraph();
-
             return model == null ? View(state) : View(state, model);
         }
 
@@ -55,6 +52,7 @@ namespace StateMachine.MultiStepForm.Controllers
             }
 
             StateMachine.Activate();
+            ViewBag.DotGraph = StateMachine.DotGraph();
             base.OnActionExecuting(context);
         }
 
