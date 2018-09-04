@@ -13,8 +13,8 @@ namespace StateMachine.MultiStepForm.Controllers
 
         protected TState State
         {
-            get => GetStateFromTempDataOrDefault();
-            set => TempData[StateKey] = value;
+            get => GetState();
+            set => SetState(value);
         }
 
         public IEnumerable<string> Triggers => StateMachine.Triggers;
@@ -40,15 +40,7 @@ namespace StateMachine.MultiStepForm.Controllers
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (context.HttpContext.Request.Method == "POST")
-            {
-                SetStateFromHiddenField(context);
-            }
-            else
-            {
-                StateMachine.ConfigureStateMachine(State);
-            }
-
+            StateMachine.ConfigureStateMachine(State);
             base.OnActionExecuting(context);
         }
 
@@ -70,30 +62,38 @@ namespace StateMachine.MultiStepForm.Controllers
             return RedirectToAction("Index", ControllerContext.RouteData.Values["controller"].ToString());
         }
 
-        private void SetStateFromHiddenField(ActionContext context)
+        protected TState GetStateFromHiddenField()
         {
-            if (!context.HttpContext.Request.HasFormContentType) return;
+            if (!HttpContext.Request.HasFormContentType)
+                return StateMachine.DefaultInitialState;
 
-            var from = context.HttpContext.Request.Form;
+            var from = HttpContext.Request.Form;
 
-            if (!from.ContainsKey(StateKey)) return;
+            if (from.ContainsKey(StateKey))
+                return StateMachine.ParseState(from[StateKey]);
 
-            var state = StateMachine.ParseState(from[StateKey]);
-            StateMachine.ConfigureStateMachine(state);
-            State = state;
+            return StateMachine.DefaultInitialState;
         }
 
-        private TState GetStateFromTempDataOrDefault()
+        protected virtual TState GetState()
         {
-            var state = StateMachine.DefaultInitialState;
-            var tempState = TempData[StateKey];
-
-            if (tempState != null)
+            if (HttpContext.Request.Method == "POST")
             {
-                state = (TState)tempState;
+                return GetStateFromHiddenField();
             }
 
-            return state;
+            var tempDataState = TempData[StateKey];
+            if (tempDataState != null)
+            {
+                return (TState)tempDataState;
+            }
+
+            return StateMachine.DefaultInitialState;
+        }
+
+        protected virtual void SetState(TState state)
+        {
+            TempData[StateKey] = state;
         }
     }
 }
