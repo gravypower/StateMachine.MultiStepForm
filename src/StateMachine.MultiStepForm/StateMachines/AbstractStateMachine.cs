@@ -10,13 +10,20 @@ namespace StateMachine.MultiStepForm.StateMachines
         private bool _isConfigured;
 
         protected StateMachine<TState, TTrigger> StateMachine { get; set; }
-        protected IDictionary<TTrigger, object> TriggerArgs { get; } = new Dictionary<TTrigger, object>();
 
-        public IEnumerable<string> Triggers => StateMachine.PermittedTriggers.Select(t => t.ToString());
+        private IDictionary<TTrigger, object> TriggerArgs { get; } = new Dictionary<TTrigger, object>();
+        private IDictionary<TState, object> StateModels { get; } = new Dictionary<TState, object>();
+
+        public IEnumerable<string> PermittedTriggers => StateMachine.PermittedTriggers.Select(t => t.ToString());
         public IList<StateMachine<TState, TTrigger>.TriggerWithParameters> TriggersWithParameters { get; }
         public TState CurrentState => StateMachine.State;
 
         public abstract TState DefaultInitialState { get; }
+
+        public void Activate()
+        {
+            StateMachine.Activate();
+        }
 
         protected AbstractStateMachine()
         {
@@ -75,12 +82,25 @@ namespace StateMachine.MultiStepForm.StateMachines
             return (TState)Enum.Parse(typeof(TState), state);
         }
 
+        public void SetModel(TState state, object model)
+        {
+            StateModels.Add(state, model);
+        }
+
+        public object GetModel(TState state)
+        {
+            return StateModels.ContainsKey(state) ? StateModels[state] : null;
+        }
+
         protected TArg GetArg<TArg>(TTrigger trigger)
         {
-            if (TriggerArgs.ContainsKey(trigger))
-                return (TArg)TriggerArgs[trigger];
+            if (!TriggerArgs.ContainsKey(trigger))
+                return default(TArg);
 
-            return default(TArg);
+            if (!(TriggerArgs[trigger] is TArg))
+                return default(TArg);
+
+            return (TArg)TriggerArgs[trigger];
         }
 
         protected abstract void DoConfigureStateMachine();

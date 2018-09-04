@@ -35,7 +35,7 @@ namespace StateMachine.MultiStepForm.Controllers
 
         protected override IEnumerable<TriggerButton> GetTriggerButtons()
         {
-            return StateMachine.Triggers.Select(trigger =>
+            return StateMachine.PermittedTriggers.Select(trigger =>
                 new TriggerButton
                 {
                     Trigger = trigger,

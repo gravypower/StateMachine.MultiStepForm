@@ -12,6 +12,11 @@ using StateMachine.MultiStepForm.Commands;
 using StateMachine.MultiStepForm.Commands.DeepThought;
 using StateMachine.MultiStepForm.CrossCuttingConcerns;
 using StateMachine.MultiStepForm.MagicStrings;
+using StateMachine.MultiStepForm.Models.DeepThought;
+using StateMachine.MultiStepForm.Queries;
+using StateMachine.MultiStepForm.Queries.DeepThought;
+using StateMachine.MultiStepForm.Specifications;
+using StateMachine.MultiStepForm.Specifications.DeepThought;
 using StateMachine.MultiStepForm.StateMachines;
 using StateMachine.MultiStepForm.StateMachines.DeepThought;
 
@@ -31,7 +36,10 @@ namespace StateMachine.MultiStepForm
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddMvc()
+                .AddSessionStateTempDataProvider();
+            services.AddSession();
+
             IntegrateSimpleInjector(services);
 
         }
@@ -53,6 +61,8 @@ namespace StateMachine.MultiStepForm
             }
 
             app.UseStaticFiles();
+
+            app.UseSession();
 
             app.UseMvc(routes =>
             {
@@ -86,6 +96,8 @@ namespace StateMachine.MultiStepForm
             _container.RegisterMvcViewComponents(app);
 
             _container.Register<ICommandHandler<SubmitYourQuestion>, SubmitYourQuestionCommandHandler>();
+            _container.Register<IQueryHandler<GetYourQuestion, string>, GetYourQuestionQueryHandler>();
+            _container.Register<Specification<AnswerViewModel>, MeaningOfLifeSpecification>();
             _container.Register<AbstractStateMachine<State, Trigger>, DeepThoughtStateMachine>();
 
             _container.RegisterDecorator(typeof(ICommandHandler<>), typeof(VerboseLoggingCommandHandlerDecorator<>));
