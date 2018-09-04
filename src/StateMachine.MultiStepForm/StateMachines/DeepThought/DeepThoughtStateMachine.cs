@@ -1,5 +1,4 @@
-﻿using Stateless.Graph;
-using StateMachine.MultiStepForm.Commands;
+﻿using StateMachine.MultiStepForm.Commands;
 using StateMachine.MultiStepForm.Commands.DeepThought;
 using StateMachine.MultiStepForm.Models.DeepThought;
 using StateMachine.MultiStepForm.Queries;
@@ -13,7 +12,7 @@ namespace StateMachine.MultiStepForm.StateMachines.DeepThought
         private readonly ICommandHandler<SubmitYourQuestion> _submitYourQuestionCommandHandler;
         private readonly IQueryHandler<GetYourQuestion, string> _getYourQuestionIQueryHandler;
         private readonly Specification<AnswerViewModel> _meaningOfLifeSpecification;
-        public override State DefaultInitialState => State.QuestionToTheAnswer;
+        public override State DefaultInitialState => State.MeaningOfLife;
 
         public DeepThoughtStateMachine(
             ICommandHandler<SubmitYourQuestion> submitYourQuestionCommandHandler,
