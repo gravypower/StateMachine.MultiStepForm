@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Stateless;
+using Stateless.Graph;
 
 namespace StateMachine.MultiStepForm.StateMachines
 {
@@ -90,6 +91,11 @@ namespace StateMachine.MultiStepForm.StateMachines
         public object GetModel(TState state)
         {
             return StateModels.ContainsKey(state) ? StateModels[state] : null;
+        }
+
+        public string DotGraph()
+        {
+            return UmlDotGraph.Format(StateMachine.GetInfo());
         }
 
         protected TArg GetArg<TArg>(TTrigger trigger)

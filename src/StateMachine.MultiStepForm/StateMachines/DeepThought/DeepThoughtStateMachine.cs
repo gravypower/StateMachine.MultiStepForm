@@ -1,4 +1,5 @@
-﻿using StateMachine.MultiStepForm.Commands;
+﻿using Stateless.Graph;
+using StateMachine.MultiStepForm.Commands;
 using StateMachine.MultiStepForm.Commands.DeepThought;
 using StateMachine.MultiStepForm.Models.DeepThought;
 using StateMachine.MultiStepForm.Queries;
@@ -17,8 +18,7 @@ namespace StateMachine.MultiStepForm.StateMachines.DeepThought
         public DeepThoughtStateMachine(
             ICommandHandler<SubmitYourQuestion> submitYourQuestionCommandHandler,
             IQueryHandler<GetYourQuestion, string> getYourQuestionIQueryHandler,
-            Specification<AnswerViewModel> meaningOfLifeSpecification
-            )
+            Specification<AnswerViewModel> meaningOfLifeSpecification)
         {
             _submitYourQuestionCommandHandler = submitYourQuestionCommandHandler;
             _getYourQuestionIQueryHandler = getYourQuestionIQueryHandler;
