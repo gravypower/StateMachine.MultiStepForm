@@ -5,16 +5,15 @@
 
 <h2>So Long, and Thanks for All the Fish</h2>
 
-<div>
-    <iframe width="681" height="511" src="https://www.youtube.com/embed/bG6b3V2MNxQ?ecver=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
+We have recored your question of:
 
-@using (Html.BeginForm("QuestionToTheAnswer", "DeepThought", FormMethod.Post))
+@if (Model != null)
 {
-<div>
-    @Html.LabelFor(m => m.Question)
-    @Html.TextBoxFor(m => m.Question)
-</div>
-
-<partial name="Triggers" />
+    <span>
+        @Model.Question
+    </span>
 }
+
+    <div>
+        <iframe width="681" height="511" src="https://www.youtube.com/embed/bG6b3V2MNxQ?ecver=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Collections.Generic;
+using System.Linq;
+using StateMachine.MultiStepForm.Models;
 using StateMachine.MultiStepForm.StateMachines;
 
 namespace StateMachine.MultiStepForm.Controllers
@@ -17,8 +19,6 @@ namespace StateMachine.MultiStepForm.Controllers
             set => SetState(value);
         }
 
-        public IEnumerable<string> Triggers => StateMachine.Triggers;
-
         protected StateMachineController(AbstractStateMachine<TState, TTrigger> stateMachine)
         {
             StateMachine = stateMachine;
@@ -27,9 +27,11 @@ namespace StateMachine.MultiStepForm.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            ViewBag.Triggers = Triggers;
+            ViewBag.Triggers = GetTriggerButtons();
             ViewBag.State = StateMachine.CurrentState;
-            return View(StateMachine.CurrentState.ToString());
+            var state = StateMachine.CurrentState.ToString();
+            var model = StateMachine.GetModel(StateMachine.CurrentState);
+            return model == null ? View(state) : View(state, model);
         }
 
         [HttpPost]
@@ -54,6 +56,16 @@ namespace StateMachine.MultiStepForm.Controllers
         {
             StateMachine.Fire(trigger, arg);
             return TriggerFired();
+        }
+
+        protected virtual IEnumerable<TriggerButton> GetTriggerButtons()
+        {
+            return StateMachine.PermittedTriggers.Select(trigger => 
+                new TriggerButton
+                {
+                    Trigger = trigger,
+                    TriggerDescription = trigger
+                });
         }
 
         private IActionResult TriggerFired()

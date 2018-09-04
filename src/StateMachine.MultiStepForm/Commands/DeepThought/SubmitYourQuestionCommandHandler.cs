@@ -1,12 +1,20 @@
 ﻿using System;
+using Microsoft.AspNetCore.Http;
 
 namespace StateMachine.MultiStepForm.Commands.DeepThought
 {
     public class SubmitYourQuestionCommandHandler:ICommandHandler<SubmitYourQuestion>
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public SubmitYourQuestionCommandHandler(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
+
         public void Handle(SubmitYourQuestion command)
         {
-            throw new NotImplementedException();
+            _httpContextAccessor.HttpContext.Session.SetString("YourQuestion", command.Question);
         }
     }
 }

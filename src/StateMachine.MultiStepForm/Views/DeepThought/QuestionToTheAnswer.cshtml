@@ -11,10 +11,10 @@ As you were on the Earth five minutes before the vogon constructor fleet destroy
 
 @using (Html.BeginForm("QuestionToTheAnswer", "DeepThought", FormMethod.Post))
 {
-<div>
-    @Html.LabelFor(m => m.Question)
-    @Html.TextBoxFor(m => m.Question)
-</div>
+    <div>
+        @Html.LabelFor(m => m.Question)
+        @Html.TextBoxFor(m => m.Question)
+    </div>
 
-<partial name="Triggers" />
+    <partial name="Triggers"/>
 }

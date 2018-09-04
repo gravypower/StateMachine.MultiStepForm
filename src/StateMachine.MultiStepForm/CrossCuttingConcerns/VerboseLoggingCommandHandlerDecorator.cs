@@ -18,11 +18,9 @@ namespace StateMachine.MultiStepForm.CrossCuttingConcerns
 
         public void Handle(TCommand command)
         {
-
             _logger.LogDebug($"Handling command: {command}");
 
             _decorated.Handle(command);
-
         }
     }
 }
