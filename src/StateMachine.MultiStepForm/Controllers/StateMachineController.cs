@@ -2,14 +2,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Collections.Generic;
 using System.Linq;
+using StateMachine.MultiStepForm.MagicStrings;
 using StateMachine.MultiStepForm.Models;
 using StateMachine.MultiStepForm.StateMachines;
 
 namespace StateMachine.MultiStepForm.Controllers
 {
+    [AutoValidateAntiforgeryToken]
     public abstract class StateMachineController<TState, TTrigger> : Controller
     {
+        private readonly IStateMachineMagicStrings<TTrigger> _stateMachineMagicStrings;
         private const string StateKey = "State";
+        private const string TriggerKey = "Trigger";
 
         protected AbstractStateMachine<TState, TTrigger> StateMachine { get; }
 
@@ -19,8 +23,11 @@ namespace StateMachine.MultiStepForm.Controllers
             set => SetState(value);
         }
 
-        protected StateMachineController(AbstractStateMachine<TState, TTrigger> stateMachine)
+        protected StateMachineController(
+            AbstractStateMachine<TState, TTrigger> stateMachine,
+            IStateMachineMagicStrings<TTrigger> stateMachineMagicStrings)
         {
+            _stateMachineMagicStrings = stateMachineMagicStrings;
             StateMachine = stateMachine;
         }
 
@@ -28,7 +35,11 @@ namespace StateMachine.MultiStepForm.Controllers
         public IActionResult Index()
         {
             ViewBag.Triggers = GetTriggerButtons();
-            ViewBag.State = StateMachine.CurrentState;
+
+            var stateToken = TokenGenerator.GetUniqueToken(64);
+            TempData[$"{StateKey}-{stateToken}"] = StateMachine.CurrentState;
+            ViewBag.State = stateToken;
+
             var state = StateMachine.CurrentState.ToString();
             var model = StateMachine.GetModel(StateMachine.CurrentState);
             return model == null ? View(state) : View(state, model);
@@ -48,24 +59,36 @@ namespace StateMachine.MultiStepForm.Controllers
 
         protected IActionResult FireTrigger(string trigger)
         {
-            StateMachine.Fire(trigger);
+            var t = (TTrigger)TempData[$"{TriggerKey}-{trigger}"];
+            StateMachine.Fire(t.ToString());
             return TriggerFired();
         }
 
         protected IActionResult FireTrigger<TArg>(string trigger, TArg arg)
         {
-            StateMachine.Fire(trigger, arg);
+            var t = (TTrigger)TempData[$"{TriggerKey}-{trigger}"];
+            StateMachine.Fire(t.ToString(), arg);
             return TriggerFired();
         }
 
-        protected virtual IEnumerable<TriggerButton> GetTriggerButtons()
+        protected IEnumerable<TriggerButton> GetTriggerButtons()
         {
-            return StateMachine.PermittedTriggers.Select(trigger => 
-                new TriggerButton
+            foreach (var trigger in StateMachine.PermittedTriggers)
+            {
+                var triggerToken = TokenGenerator.GetUniqueToken(64);
+                TempData[$"{TriggerKey}-{triggerToken}"] = trigger;
+
+                var triggerLabel = trigger.ToString();
+
+                if (_stateMachineMagicStrings.TriggerDescriptions.ContainsKey(trigger))
+                    triggerLabel = _stateMachineMagicStrings.TriggerDescriptions[trigger];
+
+                yield return new TriggerButton
                 {
-                    Trigger = trigger,
-                    TriggerDescription = trigger
-                });
+                    Trigger = triggerToken,
+                    TriggerDescription = triggerLabel
+                };
+            }
         }
 
         private IActionResult TriggerFired()
@@ -82,7 +105,9 @@ namespace StateMachine.MultiStepForm.Controllers
             var from = HttpContext.Request.Form;
 
             if (from.ContainsKey(StateKey))
-                return StateMachine.ParseState(from[StateKey]);
+            {
+                return (TState)TempData[$"{StateKey}-{from[StateKey]}"];
+            }
 
             return StateMachine.DefaultInitialState;
         }

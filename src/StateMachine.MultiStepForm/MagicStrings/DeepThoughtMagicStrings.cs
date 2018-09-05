@@ -3,27 +3,27 @@ using StateMachine.MultiStepForm.StateMachines.DeepThought;
 
 namespace StateMachine.MultiStepForm.MagicStrings
 {
-    public interface IDeepThoughtMagicStrings
+    public interface IDeepThoughtMagicStrings: IStateMachineMagicStrings<Trigger>
     {
-        IDictionary<string, string> TriggerDescriptions { get; }
+        
     }
 
     public class DeepThoughtMagicStrings: IDeepThoughtMagicStrings
     {
-        public IDictionary<string, string> TriggerDescriptions =>
-            new Dictionary<string, string>
+        public IDictionary<Trigger, string> TriggerDescriptions =>
+            new Dictionary<Trigger, string>
             {
                 {
-                    $"{Trigger.AskDeepThought}", "Your Answer"
+                    Trigger.AskDeepThought, "Your Answer"
                 },
                 {
-                    $"{Trigger.TryAgain}", "Try Again"
+                    Trigger.TryAgain, "Try Again"
                 },
                 {
-                    $"{Trigger.WhatIsTheQuestion}", "Lets find the Question"
+                    Trigger.WhatIsTheQuestion, "Lets find the Question"
                 },
                 {
-                    $"{Trigger.YourQuestionToTheAnswer}", "The Question"
+                    Trigger.YourQuestionToTheAnswer, "The Question"
                 }
             };
     }

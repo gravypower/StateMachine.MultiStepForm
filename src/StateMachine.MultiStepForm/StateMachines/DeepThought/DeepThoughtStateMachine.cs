@@ -12,6 +12,7 @@ namespace StateMachine.MultiStepForm.StateMachines.DeepThought
         private readonly ICommandHandler<SubmitYourQuestion> _submitYourQuestionCommandHandler;
         private readonly IQueryHandler<GetYourQuestion, string> _getYourQuestionIQueryHandler;
         private readonly Specification<AnswerViewModel> _meaningOfLifeSpecification;
+
         public override State DefaultInitialState => State.MeaningOfLife;
 
         public DeepThoughtStateMachine(

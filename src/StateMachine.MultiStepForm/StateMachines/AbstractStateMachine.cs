@@ -16,7 +16,7 @@ namespace StateMachine.MultiStepForm.StateMachines
         private readonly IDictionary<TState, object> _stateModels;
         private readonly IList<StateMachine<TState, TTrigger>.TriggerWithParameters> _triggersWithParameters;
 
-        public IEnumerable<string> PermittedTriggers => StateMachine.PermittedTriggers.Select(t => t.ToString());
+        public IEnumerable<TTrigger> PermittedTriggers => StateMachine.PermittedTriggers;
         public TState CurrentState => StateMachine.State;
         public abstract TState DefaultInitialState { get; }
 

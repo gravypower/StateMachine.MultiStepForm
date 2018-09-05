@@ -16,7 +16,7 @@ namespace StateMachine.MultiStepForm.Controllers
         public DeepThoughtController(
             AbstractStateMachine<State, Trigger> stateMachine,
             IDeepThoughtMagicStrings deepThoughtMagicStrings
-            ) : base(stateMachine)
+            ) : base(stateMachine, deepThoughtMagicStrings)
         {
             _deepThoughtMagicStrings = deepThoughtMagicStrings;
         }
@@ -31,16 +31,6 @@ namespace StateMachine.MultiStepForm.Controllers
         public IActionResult QuestionToTheAnswer(string trigger, QuestionViewModel model)
         {
             return FireTrigger(trigger, model);
-        }
-
-        protected override IEnumerable<TriggerButton> GetTriggerButtons()
-        {
-            return StateMachine.PermittedTriggers.Select(trigger =>
-                new TriggerButton
-                {
-                    Trigger = trigger,
-                    TriggerDescription = _deepThoughtMagicStrings.TriggerDescriptions[trigger]
-                });
         }
     }
 }
