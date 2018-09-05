@@ -1,0 +1,17 @@
+﻿@model StateMachine.MultiStepForm.Example.Models.DeepThought.AnswerViewModel
+@{
+    ViewData["Title"] = "MeaningOfLife";
+}
+
+<h2>Meaning Of Life</h2>
+
+What is the Answer to the Ultimate Question of Life, the Universe, and Everything?
+@using (Html.BeginForm())
+{
+    <div>
+        @Html.LabelFor(m => m.Answer)
+        @Html.TextBoxFor(m => m.Answer)
+    </div>
+
+    <partial name="Triggers" />
+}
