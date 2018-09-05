@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Stateless;
-using Stateless.Graph;
 
 namespace StateMachine.MultiStepForm.StateMachines
 {
@@ -26,20 +25,8 @@ namespace StateMachine.MultiStepForm.StateMachines
             _triggerArgs = new Dictionary<TTrigger, object>();
             _stateModels = new Dictionary<TState, object>();
 
-            if (!typeof(TState).IsEnum)
-            {
-                throw new ArgumentException("TState must be an enumerated type");
-            }
-
-            if (!typeof(TTrigger).IsEnum)
-            {
-                throw new ArgumentException("TTrigger must be an enumerated type");
-            }
-        }
-
-        public void Activate()
-        {
-            StateMachine.Activate();
+            GuardTState();
+            GuardTTrigger();
         }
 
         public void ConfigureStateMachine(TState initialState)
@@ -48,23 +35,21 @@ namespace StateMachine.MultiStepForm.StateMachines
 
             StateMachine = new StateMachine<TState, TTrigger>(initialState);
             DoConfigureStateMachine();
+            StateMachine.Activate();
             _isConfigured = true;
         }
 
-        public void Fire(string trigger)
+        public void Fire(TTrigger trigger)
         {
-            var t = ParseTrigger(trigger);
-            StateMachine.Fire(t);
+            StateMachine.Fire(trigger);
         }
 
-        public void Fire<TArg>(string trigger, TArg arg)
+        public void Fire<TArg>(TTrigger trigger, TArg arg)
         {
-            var t = ParseTrigger(trigger);
-
-            _triggerArgs.Add(t, arg);
+            _triggerArgs.Add(trigger, arg);
 
             var twp = (StateMachine<TState, TTrigger>.TriggerWithParameters<TArg>) 
-                _triggersWithParameters.SingleOrDefault(x => x.Trigger.Equals(t));
+                _triggersWithParameters.SingleOrDefault(x => x.Trigger.Equals(trigger));
             
             if (twp != null)
             {
@@ -73,17 +58,7 @@ namespace StateMachine.MultiStepForm.StateMachines
                 return;
             }
 
-            StateMachine.Fire(t);
-        }
-
-        public TTrigger ParseTrigger(string trigger)
-        {
-            return (TTrigger)Enum.Parse(typeof(TTrigger), trigger);
-        }
-
-        public TState ParseState(string state)
-        {
-            return (TState)Enum.Parse(typeof(TState), state);
+            StateMachine.Fire(trigger);
         }
 
         public void SetModel(TState state, object model)
@@ -94,11 +69,6 @@ namespace StateMachine.MultiStepForm.StateMachines
         public object GetModel(TState state)
         {
             return _stateModels.ContainsKey(state) ? _stateModels[state] : null;
-        }
-
-        public string DotGraph()
-        {
-            return UmlDotGraph.Format(StateMachine.GetInfo());
         }
 
         protected StateMachine<TState, TTrigger>.TriggerWithParameters<TModel> SetTriggerParameters<TModel>(TTrigger trigger)
@@ -120,5 +90,21 @@ namespace StateMachine.MultiStepForm.StateMachines
         }
 
         protected abstract void DoConfigureStateMachine();
+
+        private static void GuardTTrigger()
+        {
+            if (!typeof(TTrigger).IsEnum)
+            {
+                throw new ArgumentException("TTrigger must be an enumerated type");
+            }
+        }
+
+        private static void GuardTState()
+        {
+            if (!typeof(TState).IsEnum)
+            {
+                throw new ArgumentException("TState must be an enumerated type");
+            }
+        }
     }
 }

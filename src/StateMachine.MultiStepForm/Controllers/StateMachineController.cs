@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Collections.Generic;
-using System.Linq;
 using StateMachine.MultiStepForm.MagicStrings;
 using StateMachine.MultiStepForm.Models;
 using StateMachine.MultiStepForm.StateMachines;
@@ -16,7 +15,6 @@ namespace StateMachine.MultiStepForm.Controllers
         private const string TriggerKey = "Trigger";
 
         protected AbstractStateMachine<TState, TTrigger> StateMachine { get; }
-
         protected TState State
         {
             get => GetState();
@@ -46,9 +44,11 @@ namespace StateMachine.MultiStepForm.Controllers
         }
 
         [HttpPost]
-        public IActionResult Index(string trigger)
+        public IActionResult Index(string triggerToken)
         {
-            return FireTrigger(trigger);
+            var trigger = GetTriggerFromToken(triggerToken);
+            StateMachine.Fire(trigger);
+            return TriggerFired();
         }
 
         public override void OnActionExecuting(ActionExecutingContext context)
@@ -57,44 +57,11 @@ namespace StateMachine.MultiStepForm.Controllers
             base.OnActionExecuting(context);
         }
 
-        protected IActionResult FireTrigger(string trigger)
+        protected IActionResult FireTrigger<TArg>(string triggerToken, TArg arg)
         {
-            var t = (TTrigger)TempData[$"{TriggerKey}-{trigger}"];
-            StateMachine.Fire(t.ToString());
+            var trigger = GetTriggerFromToken(triggerToken);
+            StateMachine.Fire(trigger, arg);
             return TriggerFired();
-        }
-
-        protected IActionResult FireTrigger<TArg>(string trigger, TArg arg)
-        {
-            var t = (TTrigger)TempData[$"{TriggerKey}-{trigger}"];
-            StateMachine.Fire(t.ToString(), arg);
-            return TriggerFired();
-        }
-
-        protected IEnumerable<TriggerButton> GetTriggerButtons()
-        {
-            foreach (var trigger in StateMachine.PermittedTriggers)
-            {
-                var triggerToken = TokenGenerator.GetUniqueToken(64);
-                TempData[$"{TriggerKey}-{triggerToken}"] = trigger;
-
-                var triggerLabel = trigger.ToString();
-
-                if (_stateMachineMagicStrings.TriggerDescriptions.ContainsKey(trigger))
-                    triggerLabel = _stateMachineMagicStrings.TriggerDescriptions[trigger];
-
-                yield return new TriggerButton
-                {
-                    Trigger = triggerToken,
-                    TriggerDescription = triggerLabel
-                };
-            }
-        }
-
-        private IActionResult TriggerFired()
-        {
-            State = StateMachine.CurrentState;
-            return RedirectToAction("Index", ControllerContext.RouteData.Values["controller"].ToString());
         }
 
         protected TState GetStateFromHiddenField()
@@ -114,7 +81,7 @@ namespace StateMachine.MultiStepForm.Controllers
 
         protected virtual TState GetState()
         {
-            if (HttpContext.Request.Method == "POST")
+            if (IsPost())
             {
                 return GetStateFromHiddenField();
             }
@@ -131,6 +98,39 @@ namespace StateMachine.MultiStepForm.Controllers
         protected virtual void SetState(TState state)
         {
             TempData[StateKey] = state;
+        }
+
+        private bool IsPost() => HttpContext.Request.Method == "POST";
+
+        private IActionResult TriggerFired()
+        {
+            State = StateMachine.CurrentState;
+            return Index(); //RedirectToAction("Index", ControllerContext.RouteData.Values["controller"].ToString());
+        }
+
+        private TTrigger GetTriggerFromToken(string triggerToken)
+        {
+            return (TTrigger)TempData[$"{TriggerKey}-{triggerToken}"];
+        }
+
+        private IEnumerable<TriggerButton> GetTriggerButtons()
+        {
+            foreach (var trigger in StateMachine.PermittedTriggers)
+            {
+                var triggerToken = TokenGenerator.GetUniqueToken(64);
+                TempData[$"{TriggerKey}-{triggerToken}"] = trigger;
+
+                var triggerLabel = trigger.ToString();
+
+                if (_stateMachineMagicStrings.TriggerDescriptions.ContainsKey(trigger))
+                    triggerLabel = _stateMachineMagicStrings.TriggerDescriptions[trigger];
+
+                yield return new TriggerButton
+                {
+                    TriggerToken = triggerToken,
+                    TriggerDescription = triggerLabel
+                };
+            }
         }
     }
 }

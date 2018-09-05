@@ -1,8 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using StateMachine.MultiStepForm.MagicStrings;
-using StateMachine.MultiStepForm.Models;
 using StateMachine.MultiStepForm.Models.DeepThought;
 using StateMachine.MultiStepForm.StateMachines;
 using StateMachine.MultiStepForm.StateMachines.DeepThought;
@@ -11,26 +8,25 @@ namespace StateMachine.MultiStepForm.Controllers
 {
     public class DeepThoughtController : StateMachineController<State, Trigger>
     {
-        private readonly IDeepThoughtMagicStrings _deepThoughtMagicStrings;
-
         public DeepThoughtController(
             AbstractStateMachine<State, Trigger> stateMachine,
             IDeepThoughtMagicStrings deepThoughtMagicStrings
             ) : base(stateMachine, deepThoughtMagicStrings)
         {
-            _deepThoughtMagicStrings = deepThoughtMagicStrings;
         }
 
         [HttpPost]
-        public IActionResult MeaningOfLife(string trigger, AnswerViewModel model)
+        [RequireRequestModelType(typeof(AnswerViewModel))]
+        public IActionResult Index(string triggerToken, AnswerViewModel answerViewModel)
         {
-            return FireTrigger(trigger, model);
+            return FireTrigger(triggerToken, answerViewModel);
         }
 
         [HttpPost]
-        public IActionResult QuestionToTheAnswer(string trigger, QuestionViewModel model)
+        [RequireRequestModelType(typeof(QuestionViewModel))]
+        public IActionResult Index(string triggerToken, QuestionViewModel questionViewModel)
         {
-            return FireTrigger(trigger, model);
+            return FireTrigger(triggerToken, questionViewModel);
         }
     }
 }
