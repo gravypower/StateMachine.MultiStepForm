@@ -100,18 +100,12 @@ namespace StateMachine.MultiStepForm
             return _triggers.Single(t => t.Key == trigger) as TTrigger;
         }
 
-        private IEnumerable<TriggerButton> GetTriggerButtons()
-        {
-            foreach (var trigger in StateMachine.PermittedTriggers)
-            {
-                var triggerToken = _triggerContext.GetTriggerToken(trigger);
-
-                yield return new TriggerButton
+        private IEnumerable<TriggerButton> GetTriggerButtons() =>
+            StateMachine.PermittedTriggers.Select(trigger =>
+                new TriggerButton
                 {
-                    TriggerToken = triggerToken,
+                    TriggerToken = _triggerContext.GetTriggerToken(trigger),
                     Trigger = trigger
-                };
-            }
-        }
+                });
     }
 }
