@@ -1,24 +1,30 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace StateMachine.MultiStepForm
 {
     [AutoValidateAntiforgeryToken]
     public abstract class StateMachineController<TState, TTrigger> : Controller
+        where TTrigger : Trigger
+        where TState : State
     {
-        private readonly IStateMachineMagicStrings<TTrigger> _stateMachineMagicStrings;
-        private const string StateKey = "State";
+        private readonly IEnumerable<State> _states;
+        private readonly IEnumerable<Trigger> _triggers;
+        private const string StateKey = "stateToken";
         private const string TriggerKey = "Trigger";
 
         protected AbstractStateMachine<TState, TTrigger> StateMachine { get; }
         protected TState State => GetState();
 
         protected StateMachineController(
-            AbstractStateMachine<TState, TTrigger> stateMachine,
-            IStateMachineMagicStrings<TTrigger> stateMachineMagicStrings)
+            IEnumerable<State> states,
+            IEnumerable<Trigger> triggers,
+            AbstractStateMachine<TState, TTrigger> stateMachine)
         {
-            _stateMachineMagicStrings = stateMachineMagicStrings;
+            _states = states;
+            _triggers = triggers;
             StateMachine = stateMachine;
         }
 
@@ -28,10 +34,10 @@ namespace StateMachine.MultiStepForm
             ViewBag.Triggers = GetTriggerButtons();
 
             var stateToken = TokenGenerator.GetUniqueToken(64);
-            TempData[$"{StateKey}-{stateToken}"] = StateMachine.CurrentState;
+            TempData[$"{StateKey}-{stateToken}"] = StateMachine.CurrentState.GetType().AssemblyQualifiedName;
             ViewBag.State = stateToken;
 
-            var state = StateMachine.CurrentState.ToString();
+            var state = StateMachine.CurrentState.GetType().Name;
             var model = StateMachine.GetModel(StateMachine.CurrentState);
             return model == null ? View(state) : View(state, model);
         }
@@ -46,6 +52,8 @@ namespace StateMachine.MultiStepForm
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
+            var t = _states.Single(s => s.GetType().AssemblyQualifiedName == State.GetType().AssemblyQualifiedName);
+
             StateMachine.ConfigureStateMachine(State);
             base.OnActionExecuting(context);
         }
@@ -64,12 +72,10 @@ namespace StateMachine.MultiStepForm
 
             var from = HttpContext.Request.Form;
 
-            if (from.ContainsKey(StateKey))
-            {
-                return (TState)TempData[$"{StateKey}-{from[StateKey]}"];
-            }
+            if (!from.ContainsKey(StateKey)) return StateMachine.DefaultInitialState;
 
-            return StateMachine.DefaultInitialState;
+            var state = (string)TempData[$"{StateKey}-{from[StateKey]}"];
+            return _states.Single(s => s.GetType().AssemblyQualifiedName == state) as TState;
         }
 
         protected virtual TState GetState()
@@ -86,7 +92,8 @@ namespace StateMachine.MultiStepForm
 
         private TTrigger GetTriggerFromToken(string triggerToken)
         {
-            return (TTrigger)TempData[$"{TriggerKey}-{triggerToken}"];
+            var trigger = (string)TempData[$"{TriggerKey}-{triggerToken}"];
+            return _triggers.Single(t => t.GetType().AssemblyQualifiedName == trigger) as TTrigger;
         }
 
         private IEnumerable<TriggerButton> GetTriggerButtons()
@@ -94,17 +101,13 @@ namespace StateMachine.MultiStepForm
             foreach (var trigger in StateMachine.PermittedTriggers)
             {
                 var triggerToken = TokenGenerator.GetUniqueToken(64);
-                TempData[$"{TriggerKey}-{triggerToken}"] = trigger;
+                TempData[$"{TriggerKey}-{triggerToken}"] = trigger.GetType().AssemblyQualifiedName;
 
-                var triggerLabel = trigger.ToString();
-
-                if (_stateMachineMagicStrings.TriggerDescriptions.ContainsKey(trigger))
-                    triggerLabel = _stateMachineMagicStrings.TriggerDescriptions[trigger];
 
                 yield return new TriggerButton
                 {
                     TriggerToken = triggerToken,
-                    TriggerDescription = triggerLabel
+                    Trigger = trigger
                 };
             }
         }

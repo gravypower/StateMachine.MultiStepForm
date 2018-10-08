@@ -1,16 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using StateMachine.MultiStepForm.Example.MagicStrings;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 using StateMachine.MultiStepForm.Example.Models.DeepThought;
-using StateMachine.MultiStepForm.Example.StateMachines.DeepThought;
 
 namespace StateMachine.MultiStepForm.Example.Controllers
 {
     public class DeepThoughtController : StateMachineController<State, Trigger>
     {
         public DeepThoughtController(
-            AbstractStateMachine<State, Trigger> stateMachine,
-            IDeepThoughtMagicStrings deepThoughtMagicStrings
-            ) : base(stateMachine, deepThoughtMagicStrings)
+            IEnumerable<State> states,
+            IEnumerable<Trigger> triggers,
+            AbstractStateMachine<State, Trigger> stateMachine
+            ) : base(states, triggers, stateMachine)
         {
         }
 

@@ -1,25 +1,34 @@
-﻿using StateMachine.MultiStepForm.Example.Commands;
+﻿using System.Collections.Generic;
+using StateMachine.MultiStepForm.Example.Commands;
 using StateMachine.MultiStepForm.Example.Commands.DeepThought;
 using StateMachine.MultiStepForm.Example.Models.DeepThought;
 using StateMachine.MultiStepForm.Example.Queries;
 using StateMachine.MultiStepForm.Example.Queries.DeepThought;
 using StateMachine.MultiStepForm.Example.Specifications;
+using StateMachine.MultiStepForm.Example.StateMachines.DeepThought.States;
+using StateMachine.MultiStepForm.Example.StateMachines.DeepThought.Triggers;
 
 namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought
 {
     public class DeepThoughtStateMachine : AbstractStateMachine<State, Trigger>
     {
+        private readonly DeepThoughtState _states;
+        private readonly DeepThoughtTrigger _triggers;
         private readonly ICommandHandler<SubmitYourQuestion> _submitYourQuestionCommandHandler;
         private readonly IQueryHandler<GetYourQuestion, string> _getYourQuestionIQueryHandler;
         private readonly Specification<AnswerViewModel> _meaningOfLifeSpecification;
 
-        public override State DefaultInitialState => State.MeaningOfLife;
+        public override State DefaultInitialState => _states.MeaningOfLife;
 
         public DeepThoughtStateMachine(
+            DeepThoughtState states,
+            DeepThoughtTrigger triggers,
             ICommandHandler<SubmitYourQuestion> submitYourQuestionCommandHandler,
             IQueryHandler<GetYourQuestion, string> getYourQuestionIQueryHandler,
             Specification<AnswerViewModel> meaningOfLifeSpecification)
         {
+            _states = states;
+            _triggers = triggers;
             _submitYourQuestionCommandHandler = submitYourQuestionCommandHandler;
             _getYourQuestionIQueryHandler = getYourQuestionIQueryHandler;
             _meaningOfLifeSpecification = meaningOfLifeSpecification;
@@ -27,30 +36,30 @@ namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought
 
         protected override void DoConfigureStateMachine()
         {
-            StateMachine.Configure(State.MeaningOfLife)
-                .PermitIf(Trigger.AskDeepThought, State.CorrectAnswer, CorrectAnswer)
-                .PermitIf(Trigger.AskDeepThought, State.IncorrectAnswer, () => !CorrectAnswer());
+            StateMachine.Configure(_states.MeaningOfLife)
+                .PermitIf(_triggers.AskDeepThought, _states.CorrectAnswer, CorrectAnswer)
+                .PermitIf(_triggers.AskDeepThought, _states.IncorrectAnswer, () => !CorrectAnswer());
 
-            StateMachine.Configure(State.CorrectAnswer)
-                .Permit(Trigger.WhatIsTheQuestion, State.QuestionToTheAnswer);
+            StateMachine.Configure(_states.CorrectAnswer)
+                .Permit(_triggers.WhatIsTheQuestion, _states.QuestionToTheAnswer);
 
-            StateMachine.Configure(State.IncorrectAnswer)
-                .Permit(Trigger.TryAgain, State.MeaningOfLife)
-                .Permit(Trigger.WhatIsTheQuestion, State.QuestionToTheAnswer);
+            StateMachine.Configure(_states.IncorrectAnswer)
+                .Permit(_triggers.TryAgain, _states.MeaningOfLife)
+                .Permit(_triggers.WhatIsTheQuestion, _states.QuestionToTheAnswer);
 
-            StateMachine.Configure(State.QuestionToTheAnswer)
-                .Permit(Trigger.YourQuestionToTheAnswer, State.SoLongAndThanksForAllTheFish);
+            StateMachine.Configure(_states.QuestionToTheAnswer)
+                .Permit(_triggers.YourQuestionToTheAnswer, _states.SoLongAndThanksForAllTheFish);
 
-            var yourQuestionToTheAnswerTrigger = SetTriggerParameters<QuestionViewModel>(Trigger.YourQuestionToTheAnswer);
+            var yourQuestionToTheAnswerTrigger = SetTriggerParameters<QuestionViewModel>(_triggers.YourQuestionToTheAnswer);
             
-            StateMachine.Configure(State.SoLongAndThanksForAllTheFish)
+            StateMachine.Configure(_states.SoLongAndThanksForAllTheFish)
                 .OnEntryFrom(yourQuestionToTheAnswerTrigger, YourAnswer)
                 .OnActivate(GetQuestion);
         }
 
         public bool CorrectAnswer()
         {
-            var arg = GetArg<AnswerViewModel>(Trigger.AskDeepThought);
+            var arg = GetArg<AnswerViewModel>(_triggers.AskDeepThought);
             return _meaningOfLifeSpecification.IsSatisfiedBy(arg);
         }
 
@@ -67,7 +76,7 @@ namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought
         private void GetQuestion()
         {
             var question = _getYourQuestionIQueryHandler.Handle(new GetYourQuestion());
-            SetModel(State.SoLongAndThanksForAllTheFish,
+            SetModel(_states.SoLongAndThanksForAllTheFish,
                 new QuestionViewModel
                 {
                     Question = question

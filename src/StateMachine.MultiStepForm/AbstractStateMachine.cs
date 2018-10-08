@@ -6,6 +6,8 @@ using Stateless;
 namespace StateMachine.MultiStepForm
 {
     public abstract class AbstractStateMachine<TState, TTrigger>
+        where TTrigger : Trigger
+        where TState : State
     {
         private bool _isConfigured;
 
@@ -24,9 +26,6 @@ namespace StateMachine.MultiStepForm
             _triggersWithParameters = new List<StateMachine<TState, TTrigger>.TriggerWithParameters>();
             _triggerArgs = new Dictionary<TTrigger, object>();
             _stateModels = new Dictionary<TState, object>();
-
-            GuardTState();
-            GuardTTrigger();
         }
 
         public void ConfigureStateMachine(TState initialState)
@@ -90,21 +89,5 @@ namespace StateMachine.MultiStepForm
         }
 
         protected abstract void DoConfigureStateMachine();
-
-        private static void GuardTTrigger()
-        {
-            if (!typeof(TTrigger).IsEnum)
-            {
-                throw new ArgumentException("TTrigger must be an enumerated type");
-            }
-        }
-
-        private static void GuardTState()
-        {
-            if (!typeof(TState).IsEnum)
-            {
-                throw new ArgumentException("TState must be an enumerated type");
-            }
-        }
     }
 }

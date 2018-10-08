@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -11,7 +12,6 @@ using SimpleInjector.Lifestyles;
 using StateMachine.MultiStepForm.Example.Commands;
 using StateMachine.MultiStepForm.Example.Commands.DeepThought;
 using StateMachine.MultiStepForm.Example.CrossCuttingConcerns;
-using StateMachine.MultiStepForm.Example.MagicStrings;
 using StateMachine.MultiStepForm.Example.Models.DeepThought;
 using StateMachine.MultiStepForm.Example.Queries;
 using StateMachine.MultiStepForm.Example.Queries.DeepThought;
@@ -101,7 +101,25 @@ namespace StateMachine.MultiStepForm.Example
 
             _container.RegisterDecorator(typeof(ICommandHandler<>), typeof(VerboseLoggingCommandHandlerDecorator<>));
 
-            _container.Register<IDeepThoughtMagicStrings, DeepThoughtMagicStrings>();
+            var assembly = GetType().Assembly;
+            var triggers = _container.GetTypesToRegister(typeof(Trigger), assembly);
+
+            foreach (var trigger in triggers)
+            {
+                var registration = Lifestyle.Scoped.CreateRegistration(trigger, _container);
+                _container.AddRegistration(trigger, registration);
+            }
+
+            var states = _container.GetTypesToRegister(typeof(State), assembly);
+
+            foreach (var state in states)
+            {
+                var registration = Lifestyle.Scoped.CreateRegistration(state, _container);
+                _container.AddRegistration(state, registration);
+            }
+
+            _container.Collection.Register<Trigger>(assembly);
+            _container.Collection.Register<State>(assembly);
 
             // Allow Simple Injector to resolve services from ASP.NET Core.
             _container.AutoCrossWireAspNetComponents(app);
