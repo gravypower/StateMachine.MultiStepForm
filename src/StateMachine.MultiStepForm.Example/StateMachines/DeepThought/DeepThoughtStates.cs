@@ -9,5 +9,9 @@ namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought
         public static IncorrectAnswer IncorrectAnswer => Startup.Container.GetInstance<IncorrectAnswer>();
         public static QuestionToTheAnswer QuestionToTheAnswer => Startup.Container.GetInstance<QuestionToTheAnswer>();
         public static SoLongAndThanksForAllTheFish SoLongAndThanksForAllTheFish => Startup.Container.GetInstance<SoLongAndThanksForAllTheFish>();
+
+        public abstract class State : MultiStepForm.State
+        {
+        }
     }
 }

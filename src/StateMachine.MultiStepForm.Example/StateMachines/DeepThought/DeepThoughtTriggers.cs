@@ -9,5 +9,9 @@ namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought
         public static WhatIsTheQuestion WhatIsTheQuestion => Startup.Container.GetInstance<WhatIsTheQuestion>();
         public static TryAgain TryAgain => Startup.Container.GetInstance<TryAgain>();
         public static YourQuestionToTheAnswer YourQuestionToTheAnswer => Startup.Container.GetInstance<YourQuestionToTheAnswer>();
+
+        public abstract class Trigger : MultiStepForm.Trigger
+        {
+        }
     }
 }

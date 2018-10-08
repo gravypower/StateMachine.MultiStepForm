@@ -5,7 +5,7 @@ using StateMachine.MultiStepForm.Example.Queries.DeepThought;
 
 namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought.States
 {
-    public class SoLongAndThanksForAllTheFish : State
+    public class SoLongAndThanksForAllTheFish : DeepThoughtStates.State
     {
         private readonly StateContext _stateContext;
         private readonly IQueryHandler<GetYourQuestion, string> _getYourQuestionIQueryHandler;

@@ -2,17 +2,18 @@
 using Microsoft.AspNetCore.Mvc;
 using StateMachine.MultiStepForm.Contexts;
 using StateMachine.MultiStepForm.Example.Models.DeepThought;
+using StateMachine.MultiStepForm.Example.StateMachines.DeepThought;
 
 namespace StateMachine.MultiStepForm.Example.Controllers
 {
-    public class DeepThoughtController : StateMachineController<State, Trigger>
+    public class DeepThoughtController : StateMachineController<DeepThoughtStates.State, DeepThoughtTriggers.Trigger>
     {
         public DeepThoughtController(
             StateContext stateContext,
             TriggerContext triggerContext,
             IEnumerable<State> states,
             IEnumerable<Trigger> triggers,
-            AbstractStateMachine<State, Trigger> stateMachine
+            AbstractStateMachine<DeepThoughtStates.State, DeepThoughtTriggers.Trigger> stateMachine
             ) : base(stateContext, triggerContext, states, triggers, stateMachine)
         {
         }

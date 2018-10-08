@@ -3,9 +3,9 @@ using StateMachine.MultiStepForm.Example.Models.DeepThought;
 
 namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought
 {
-    public class DeepThoughtStateMachine : AbstractStateMachine<State, Trigger>
+    public class DeepThoughtStateMachine : AbstractStateMachine<DeepThoughtStates.State, DeepThoughtTriggers.Trigger>
     {
-        public override State DefaultInitialState => DeepThoughtStates.MeaningOfLife;
+        public override DeepThoughtStates.State DefaultInitialState => DeepThoughtStates.MeaningOfLife;
 
         public DeepThoughtStateMachine(
             StateContext stateContext,

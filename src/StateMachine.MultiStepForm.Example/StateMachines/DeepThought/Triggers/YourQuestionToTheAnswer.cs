@@ -4,7 +4,7 @@ using StateMachine.MultiStepForm.Example.Models.DeepThought;
 
 namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought.Triggers
 {
-    public class YourQuestionToTheAnswer : Trigger
+    public class YourQuestionToTheAnswer : DeepThoughtTriggers.Trigger
     {
         private readonly ICommandHandler<SubmitYourQuestion> _submitYourQuestionCommandHandler;
         public override string Description => "YourQuestionToTheAnswer";

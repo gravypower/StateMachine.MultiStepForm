@@ -4,7 +4,7 @@ using StateMachine.MultiStepForm.Example.Specifications;
 
 namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought.States
 {
-    public class CorrectAnswer : State
+    public class CorrectAnswer : DeepThoughtStates.State
     {
         private readonly TriggerContext _triggerContext;
         private readonly Specification<AnswerViewModel> _meaningOfLifeSpecification;

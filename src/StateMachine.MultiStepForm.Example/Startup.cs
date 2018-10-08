@@ -19,8 +19,6 @@ using StateMachine.MultiStepForm.Example.Queries.DeepThought;
 using StateMachine.MultiStepForm.Example.Specifications;
 using StateMachine.MultiStepForm.Example.Specifications.DeepThought;
 using StateMachine.MultiStepForm.Example.StateMachines.DeepThought;
-using StateMachine.MultiStepForm.Example.StateMachines.DeepThought.States;
-using StateMachine.MultiStepForm.Example.StateMachines.DeepThought.Triggers;
 
 namespace StateMachine.MultiStepForm.Example
 {
@@ -101,7 +99,7 @@ namespace StateMachine.MultiStepForm.Example
             Container.Register<ICommandHandler<SubmitYourQuestion>, SubmitYourQuestionCommandHandler>();
             Container.Register<IQueryHandler<GetYourQuestion, string>, GetYourQuestionQueryHandler>();
             
-            Container.Register<AbstractStateMachine<State, Trigger>, DeepThoughtStateMachine>();
+            Container.Register<AbstractStateMachine<DeepThoughtStates.State, DeepThoughtTriggers.Trigger>, DeepThoughtStateMachine>();
 
             Container.RegisterDecorator(typeof(ICommandHandler<>), typeof(VerboseLoggingCommandHandlerDecorator<>));
 
