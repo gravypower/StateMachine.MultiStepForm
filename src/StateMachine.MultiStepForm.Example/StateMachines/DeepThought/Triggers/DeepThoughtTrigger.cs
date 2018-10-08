@@ -1,20 +1,16 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought.Triggers
 {
-    public class DeepThoughtTrigger
+    public class DeepThoughtTrigger : AbstractStateMachineTriggers
     {
-        private readonly IEnumerable<Trigger> _triggers;
+        public AskDeepThought AskDeepThought => GetGrigger<AskDeepThought>();
+        public WhatIsTheQuestion WhatIsTheQuestion => GetGrigger<WhatIsTheQuestion>();
+        public TryAgain TryAgain => GetGrigger<TryAgain>();
+        public YourQuestionToTheAnswer YourQuestionToTheAnswer => GetGrigger<YourQuestionToTheAnswer>();
 
-        public Trigger AskDeepThought => _triggers.Single(t => t.GetType() == typeof(AskDeepThought));
-        public Trigger WhatIsTheQuestion => _triggers.Single(t => t.GetType() == typeof(WhatIsTheQuestion));
-        public Trigger TryAgain => _triggers.Single(t => t.GetType() == typeof(TryAgain));
-        public Trigger YourQuestionToTheAnswer => _triggers.Single(t => t.GetType() == typeof(YourQuestionToTheAnswer));
-
-        public DeepThoughtTrigger(IEnumerable<Trigger> triggers)
+        public DeepThoughtTrigger(IEnumerable<Trigger> triggers) : base(triggers)
         {
-            _triggers = triggers;
         }
     }
 }

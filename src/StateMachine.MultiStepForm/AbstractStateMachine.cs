@@ -63,16 +63,12 @@ namespace StateMachine.MultiStepForm
             StateMachine.Fire(trigger);
         }
 
-        
-
         protected StateMachine<TState, TTrigger>.TriggerWithParameters<TModel> SetTriggerParameters<TModel>(TTrigger trigger)
         {
             var triggerWithParameter = StateMachine.SetTriggerParameters<TModel>(trigger);
             _triggersWithParameters.Add(triggerWithParameter);
             return triggerWithParameter;
         }
-
-       
 
         protected abstract void DoConfigureStateMachine();
     }

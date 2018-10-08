@@ -1,11 +1,5 @@
-﻿using System.Collections.Generic;
-using StateMachine.MultiStepForm.Contexts;
-using StateMachine.MultiStepForm.Example.Commands;
-using StateMachine.MultiStepForm.Example.Commands.DeepThought;
+﻿using StateMachine.MultiStepForm.Contexts;
 using StateMachine.MultiStepForm.Example.Models.DeepThought;
-using StateMachine.MultiStepForm.Example.Queries;
-using StateMachine.MultiStepForm.Example.Queries.DeepThought;
-using StateMachine.MultiStepForm.Example.Specifications;
 using StateMachine.MultiStepForm.Example.StateMachines.DeepThought.States;
 using StateMachine.MultiStepForm.Example.StateMachines.DeepThought.Triggers;
 
@@ -13,25 +7,19 @@ namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought
 {
     public class DeepThoughtStateMachine : AbstractStateMachine<State, Trigger>
     {
-        private readonly DeepThoughtState _states;
+        private readonly DeepThoughtStates _states;
         private readonly DeepThoughtTrigger _triggers;
-        private readonly ICommandHandler<SubmitYourQuestion> _submitYourQuestionCommandHandler;
-        private readonly IQueryHandler<GetYourQuestion, string> _getYourQuestionIQueryHandler;
 
         public override State DefaultInitialState => _states.MeaningOfLife;
 
         public DeepThoughtStateMachine(
             StateContext stateContext,
             TriggerContext triggerContext,
-            DeepThoughtState states,
-            DeepThoughtTrigger triggers,
-            ICommandHandler<SubmitYourQuestion> submitYourQuestionCommandHandler,
-            IQueryHandler<GetYourQuestion, string> getYourQuestionIQueryHandler) : base(triggerContext, stateContext)
+            DeepThoughtStates states,
+            DeepThoughtTrigger triggers) : base(triggerContext, stateContext)
         {
             _states = states;
             _triggers = triggers;
-            _submitYourQuestionCommandHandler = submitYourQuestionCommandHandler;
-            _getYourQuestionIQueryHandler = getYourQuestionIQueryHandler;
         }
 
         protected override void DoConfigureStateMachine()
@@ -53,29 +41,8 @@ namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought
             var yourQuestionToTheAnswerTrigger = SetTriggerParameters<QuestionViewModel>(_triggers.YourQuestionToTheAnswer);
             
             StateMachine.Configure(_states.SoLongAndThanksForAllTheFish)
-                .OnEntryFrom(yourQuestionToTheAnswerTrigger, YourAnswer)
-                .OnActivate(GetQuestion);
-        }
-
-
-        private void YourAnswer(QuestionViewModel question)
-        {
-            var command = new SubmitYourQuestion
-            {
-                Question = question.Question
-            };
-
-            _submitYourQuestionCommandHandler.Handle(command);
-        }
-        
-        private void GetQuestion()
-        {
-            var question = _getYourQuestionIQueryHandler.Handle(new GetYourQuestion());
-            StateContext.SetModel(_states.SoLongAndThanksForAllTheFish,
-                new QuestionViewModel
-                {
-                    Question = question
-                });
-        }
+                .OnEntryFrom(yourQuestionToTheAnswerTrigger, _triggers.YourQuestionToTheAnswer.YourAnswer)
+                .OnActivate(_states.SoLongAndThanksForAllTheFish.GetQuestion);
+        }       
     }
 }

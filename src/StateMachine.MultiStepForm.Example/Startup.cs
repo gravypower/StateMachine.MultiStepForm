@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -20,6 +22,8 @@ using StateMachine.MultiStepForm.Example.Queries.DeepThought;
 using StateMachine.MultiStepForm.Example.Specifications;
 using StateMachine.MultiStepForm.Example.Specifications.DeepThought;
 using StateMachine.MultiStepForm.Example.StateMachines.DeepThought;
+using StateMachine.MultiStepForm.Example.StateMachines.DeepThought.States;
+using StateMachine.MultiStepForm.Example.StateMachines.DeepThought.Triggers;
 
 namespace StateMachine.MultiStepForm.Example
 {
@@ -78,6 +82,7 @@ namespace StateMachine.MultiStepForm.Example
         private void IntegrateSimpleInjector(IServiceCollection services)
         {
             _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            _container.Options.DefaultLifestyle = Lifestyle.Scoped;
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
@@ -98,36 +103,34 @@ namespace StateMachine.MultiStepForm.Example
 
             _container.Register<ICommandHandler<SubmitYourQuestion>, SubmitYourQuestionCommandHandler>();
             _container.Register<IQueryHandler<GetYourQuestion, string>, GetYourQuestionQueryHandler>();
-            _container.Register<Specification<AnswerViewModel>, MeaningOfLifeSpecification>();
+            
             _container.Register<AbstractStateMachine<State, Trigger>, DeepThoughtStateMachine>();
 
             _container.RegisterDecorator(typeof(ICommandHandler<>), typeof(VerboseLoggingCommandHandlerDecorator<>));
 
+            _container.Register<DeepThoughtStates>();
+            _container.Register<DeepThoughtTrigger>();
+
             var assembly = GetType().Assembly;
-            var triggers = _container.GetTypesToRegister(typeof(Trigger), assembly);
-
-            foreach (var trigger in triggers)
-            {
-                var registration = Lifestyle.Scoped.CreateRegistration(trigger, _container);
-                _container.AddRegistration(trigger, registration);
-            }
-
-            var states = _container.GetTypesToRegister(typeof(State), assembly);
-
-            foreach (var state in states)
-            {
-                var registration = Lifestyle.Scoped.CreateRegistration(state, _container);
-                _container.AddRegistration(state, registration);
-            }
-
-            _container.Collection.Register<Trigger>(assembly);
-            _container.Collection.Register<State>(assembly);
+            RegisterScopedCollection<State>(assembly);
+            RegisterScopedCollection<Trigger>(assembly);
 
             _container.Register<StateContext>();
             _container.Register<TriggerContext>();
+            _container.Register<Specification<AnswerViewModel>, MeaningOfLifeSpecification>();
 
             // Allow Simple Injector to resolve services from ASP.NET Core.
             _container.AutoCrossWireAspNetComponents(app);
+        }
+
+        private void RegisterScopedCollection<TType>(Assembly assembly)
+        {
+            var registrationTypes = _container.GetTypesToRegister(typeof(TType), assembly);
+            foreach (var registrationType in registrationTypes)
+            {
+                var registration = Lifestyle.Scoped.CreateRegistration(registrationType, _container);
+                _container.Collection.Append(typeof(TType), registration);
+            }   
         }
     }
 }
