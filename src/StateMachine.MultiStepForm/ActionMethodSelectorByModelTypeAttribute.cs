@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Routing;
 
 namespace StateMachine.MultiStepForm
 {
-    public class RequireRequestModelTypeAttribute : ActionMethodSelectorAttribute
+    public class ActionMethodSelectorByModelTypeAttribute : ActionMethodSelectorAttribute
     {
         private readonly Type _modelParameterType;
 
-        public RequireRequestModelTypeAttribute(Type modelParameterType = null)
+        public ActionMethodSelectorByModelTypeAttribute(Type modelParameterType = null)
         {
             _modelParameterType = modelParameterType;
         }

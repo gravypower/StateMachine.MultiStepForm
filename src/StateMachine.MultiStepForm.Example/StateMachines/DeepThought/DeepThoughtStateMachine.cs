@@ -30,7 +30,6 @@ namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought
                 .Permit(DeepThoughtTriggers.YourQuestionToTheAnswer, DeepThoughtStates.SoLongAndThanksForAllTheFish);
 
             var yourQuestionToTheAnswerTrigger = SetTriggerParameters<QuestionViewModel>(DeepThoughtTriggers.YourQuestionToTheAnswer);
-            
             StateMachine.Configure(DeepThoughtStates.SoLongAndThanksForAllTheFish)
                 .OnEntryFrom(yourQuestionToTheAnswerTrigger, DeepThoughtTriggers.YourQuestionToTheAnswer.YourAnswer)
                 .OnActivate(DeepThoughtStates.SoLongAndThanksForAllTheFish.GetQuestion);

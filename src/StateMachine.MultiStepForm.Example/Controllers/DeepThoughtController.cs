@@ -9,22 +9,23 @@ namespace StateMachine.MultiStepForm.Example.Controllers
     {
         public DeepThoughtController(
             StateContext stateContext,
+            TriggerContext triggerContext,
             IEnumerable<State> states,
             IEnumerable<Trigger> triggers,
             AbstractStateMachine<State, Trigger> stateMachine
-            ) : base(stateContext, states, triggers, stateMachine)
+            ) : base(stateContext, triggerContext, states, triggers, stateMachine)
         {
         }
 
         [HttpPost]
-        [RequireRequestModelType(typeof(AnswerViewModel))]
+        [ActionMethodSelectorByModelType(typeof(AnswerViewModel))]
         public IActionResult Index(string triggerToken, AnswerViewModel answerViewModel)
         {
             return FireTrigger(triggerToken, answerViewModel);
         }
 
         [HttpPost]
-        [RequireRequestModelType(typeof(QuestionViewModel))]
+        [ActionMethodSelectorByModelType(typeof(QuestionViewModel))]
         public IActionResult Index(string triggerToken, QuestionViewModel questionViewModel)
         {
             return FireTrigger(triggerToken, questionViewModel);

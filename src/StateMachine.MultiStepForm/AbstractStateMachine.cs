@@ -10,18 +10,19 @@ namespace StateMachine.MultiStepForm
         where TTrigger : Trigger
         where TState : State
     {
+        private readonly IList<StateMachine<TState, TTrigger>.TriggerWithParameters> _triggersWithParameters;
+        private bool _isConfigured;
+
         protected readonly TriggerContext TriggerContext;
         protected readonly StateContext StateContext;
-        private bool _isConfigured;
 
         protected StateMachine<TState, TTrigger> StateMachine { get; set; }
         
-        private readonly IList<StateMachine<TState, TTrigger>.TriggerWithParameters> _triggersWithParameters;
-
         public IEnumerable<TTrigger> PermittedTriggers => StateMachine.PermittedTriggers;
         public TState CurrentState => StateMachine.State;
-        public abstract TState DefaultInitialState { get; }
 
+        public abstract TState DefaultInitialState { get; }
+        
         protected AbstractStateMachine(
             TriggerContext triggerContext,
             StateContext stateContext)

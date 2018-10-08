@@ -1,7 +1,6 @@
 ﻿using StateMachine.MultiStepForm.Contexts;
 using StateMachine.MultiStepForm.Example.Models.DeepThought;
 using StateMachine.MultiStepForm.Example.Specifications;
-using StateMachine.MultiStepForm.Example.StateMachines.DeepThought.Triggers;
 
 namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought.States
 {

@@ -11,22 +11,25 @@ namespace StateMachine.MultiStepForm
         where TTrigger : Trigger
         where TState : State
     {
+        private const string StateInputKey = "stateToken";
+
         private readonly StateContext _stateContext;
+        private readonly TriggerContext _triggerContext;
         private readonly IEnumerable<State> _states;
         private readonly IEnumerable<Trigger> _triggers;
-        private const string StateKey = "stateToken";
-        private const string TriggerKey = "Trigger";
 
         protected AbstractStateMachine<TState, TTrigger> StateMachine { get; }
         protected TState State => GetState();
 
         protected StateMachineController(
             StateContext stateContext,
+            TriggerContext triggerContext,
             IEnumerable<State> states,
             IEnumerable<Trigger> triggers,
             AbstractStateMachine<TState, TTrigger> stateMachine)
         {
             _stateContext = stateContext;
+            _triggerContext = triggerContext;
             _states = states;
             _triggers = triggers;
             StateMachine = stateMachine;
@@ -37,8 +40,7 @@ namespace StateMachine.MultiStepForm
         {
             ViewBag.Triggers = GetTriggerButtons();
 
-            var stateToken = TokenGenerator.GetUniqueToken(64);
-            TempData[$"{StateKey}-{stateToken}"] = StateMachine.CurrentState.GetType().AssemblyQualifiedName;
+            var stateToken = _stateContext.GetStateToken(StateMachine.CurrentState);
             ViewBag.State = stateToken;
 
             var state = StateMachine.CurrentState.GetType().Name;
@@ -56,8 +58,6 @@ namespace StateMachine.MultiStepForm
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            var t = _states.Single(s => s.GetType().AssemblyQualifiedName == State.GetType().AssemblyQualifiedName);
-
             StateMachine.ConfigureStateMachine(State);
             base.OnActionExecuting(context);
         }
@@ -76,13 +76,13 @@ namespace StateMachine.MultiStepForm
 
             var from = HttpContext.Request.Form;
 
-            if (!from.ContainsKey(StateKey)) return StateMachine.DefaultInitialState;
+            if (!from.ContainsKey(StateInputKey)) return StateMachine.DefaultInitialState;
 
-            var state = (string)TempData[$"{StateKey}-{from[StateKey]}"];
-            return _states.Single(s => s.GetType().AssemblyQualifiedName == state) as TState;
+            var state = _stateContext.GetStateKeyFromToken(from[StateInputKey]);
+            return _states.Single(s => s.Key == state) as TState;
         }
 
-        protected virtual TState GetState()
+        protected TState GetState()
         {
             return IsPost() ? GetStateFromHiddenField() : StateMachine.DefaultInitialState;
         }
@@ -96,17 +96,15 @@ namespace StateMachine.MultiStepForm
 
         private TTrigger GetTriggerFromToken(string triggerToken)
         {
-            var trigger = (string)TempData[$"{TriggerKey}-{triggerToken}"];
-            return _triggers.Single(t => t.GetType().AssemblyQualifiedName == trigger) as TTrigger;
+            var trigger = _triggerContext.GetTriggerKeyFromToken(triggerToken);
+            return _triggers.Single(t => t.Key == trigger) as TTrigger;
         }
 
         private IEnumerable<TriggerButton> GetTriggerButtons()
         {
             foreach (var trigger in StateMachine.PermittedTriggers)
             {
-                var triggerToken = TokenGenerator.GetUniqueToken(64);
-                TempData[$"{TriggerKey}-{triggerToken}"] = trigger.GetType().AssemblyQualifiedName;
-
+                var triggerToken = _triggerContext.GetTriggerToken(trigger);
 
                 yield return new TriggerButton
                 {
