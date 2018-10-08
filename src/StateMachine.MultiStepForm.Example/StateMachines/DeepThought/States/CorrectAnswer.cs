@@ -20,7 +20,7 @@ namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought.States
 
         public bool IsCorrectAnswer()
         {
-            var arg = _triggerContext.GetArg<AnswerViewModel>(DeepThoughtTrigger.AskDeepThought);
+            var arg = _triggerContext.GetArg<AnswerViewModel>(DeepThoughtTriggers.AskDeepThought);
             return _meaningOfLifeSpecification.IsSatisfiedBy(arg);
         }
 

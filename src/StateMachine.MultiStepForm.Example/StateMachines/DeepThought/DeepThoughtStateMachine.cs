@@ -16,23 +16,23 @@ namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought
         protected override void DoConfigureStateMachine()
         {
             StateMachine.Configure(DeepThoughtStates.MeaningOfLife)
-                .PermitIf(DeepThoughtTrigger.AskDeepThought, DeepThoughtStates.CorrectAnswer, DeepThoughtStates.CorrectAnswer.IsCorrectAnswer)
-                .PermitIf(DeepThoughtTrigger.AskDeepThought, DeepThoughtStates.IncorrectAnswer, DeepThoughtStates.CorrectAnswer.IsNotCorrectAnswer);
+                .PermitIf(DeepThoughtTriggers.AskDeepThought, DeepThoughtStates.CorrectAnswer, DeepThoughtStates.CorrectAnswer.IsCorrectAnswer)
+                .PermitIf(DeepThoughtTriggers.AskDeepThought, DeepThoughtStates.IncorrectAnswer, DeepThoughtStates.CorrectAnswer.IsNotCorrectAnswer);
 
             StateMachine.Configure(DeepThoughtStates.CorrectAnswer)
-                .Permit(DeepThoughtTrigger.WhatIsTheQuestion, DeepThoughtStates.QuestionToTheAnswer);
+                .Permit(DeepThoughtTriggers.WhatIsTheQuestion, DeepThoughtStates.QuestionToTheAnswer);
 
             StateMachine.Configure(DeepThoughtStates.IncorrectAnswer)
-                .Permit(DeepThoughtTrigger.TryAgain, DeepThoughtStates.MeaningOfLife)
-                .Permit(DeepThoughtTrigger.WhatIsTheQuestion, DeepThoughtStates.QuestionToTheAnswer);
+                .Permit(DeepThoughtTriggers.TryAgain, DeepThoughtStates.MeaningOfLife)
+                .Permit(DeepThoughtTriggers.WhatIsTheQuestion, DeepThoughtStates.QuestionToTheAnswer);
 
             StateMachine.Configure(DeepThoughtStates.QuestionToTheAnswer)
-                .Permit(DeepThoughtTrigger.YourQuestionToTheAnswer, DeepThoughtStates.SoLongAndThanksForAllTheFish);
+                .Permit(DeepThoughtTriggers.YourQuestionToTheAnswer, DeepThoughtStates.SoLongAndThanksForAllTheFish);
 
-            var yourQuestionToTheAnswerTrigger = SetTriggerParameters<QuestionViewModel>(DeepThoughtTrigger.YourQuestionToTheAnswer);
+            var yourQuestionToTheAnswerTrigger = SetTriggerParameters<QuestionViewModel>(DeepThoughtTriggers.YourQuestionToTheAnswer);
             
             StateMachine.Configure(DeepThoughtStates.SoLongAndThanksForAllTheFish)
-                .OnEntryFrom(yourQuestionToTheAnswerTrigger, DeepThoughtTrigger.YourQuestionToTheAnswer.YourAnswer)
+                .OnEntryFrom(yourQuestionToTheAnswerTrigger, DeepThoughtTriggers.YourQuestionToTheAnswer.YourAnswer)
                 .OnActivate(DeepThoughtStates.SoLongAndThanksForAllTheFish.GetQuestion);
         }       
     }
