@@ -7,23 +7,20 @@ namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought.States
 {
     public class CorrectAnswer : State
     {
-        private readonly DeepThoughtTrigger _triggers;
         private readonly TriggerContext _triggerContext;
         private readonly Specification<AnswerViewModel> _meaningOfLifeSpecification;
 
         public CorrectAnswer(
-            DeepThoughtTrigger triggers,
             TriggerContext triggerContext,
             Specification<AnswerViewModel> meaningOfLifeSpecification)
         {
-            _triggers = triggers;
             _triggerContext = triggerContext;
             _meaningOfLifeSpecification = meaningOfLifeSpecification;
         }
 
         public bool IsCorrectAnswer()
         {
-            var arg = _triggerContext.GetArg<AnswerViewModel>(_triggers.AskDeepThought);
+            var arg = _triggerContext.GetArg<AnswerViewModel>(DeepThoughtTrigger.AskDeepThought);
             return _meaningOfLifeSpecification.IsSatisfiedBy(arg);
         }
 

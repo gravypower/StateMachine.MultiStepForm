@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -9,7 +7,6 @@ using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleInjector;
-using SimpleInjector.Integration.AspNetCore;
 using SimpleInjector.Integration.AspNetCore.Mvc;
 using SimpleInjector.Lifestyles;
 using StateMachine.MultiStepForm.Contexts;
@@ -29,7 +26,7 @@ namespace StateMachine.MultiStepForm.Example
 {
     public class Startup
     {
-        private readonly Container _container = new Container();
+        public static readonly Container Container = new Container();
 
         public Startup(IConfiguration configuration)
         {
@@ -54,7 +51,7 @@ namespace StateMachine.MultiStepForm.Example
         {
             InitialiseContainer(app);
 
-            _container.Verify(VerificationOption.VerifyAndDiagnose);
+            Container.Verify(VerificationOption.VerifyAndDiagnose);
 
             if (env.IsDevelopment())
             {
@@ -81,55 +78,52 @@ namespace StateMachine.MultiStepForm.Example
 
         private void IntegrateSimpleInjector(IServiceCollection services)
         {
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
-            _container.Options.DefaultLifestyle = Lifestyle.Scoped;
+            Container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            Container.Options.DefaultLifestyle = Lifestyle.Scoped;
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             services.AddSingleton<IControllerActivator>(
-                new SimpleInjectorControllerActivator(_container));
+                new SimpleInjectorControllerActivator(Container));
             services.AddSingleton<IViewComponentActivator>(
-                new SimpleInjectorViewComponentActivator(_container));
+                new SimpleInjectorViewComponentActivator(Container));
 
-            services.EnableSimpleInjectorCrossWiring(_container);
-            services.UseSimpleInjectorAspNetRequestScoping(_container);
+            services.EnableSimpleInjectorCrossWiring(Container);
+            services.UseSimpleInjectorAspNetRequestScoping(Container);
         }
 
         private void InitialiseContainer(IApplicationBuilder app)
         {
             // Add application presentation components:
-            _container.RegisterMvcControllers(app);
-            _container.RegisterMvcViewComponents(app);
+            Container.RegisterMvcControllers(app);
+            Container.RegisterMvcViewComponents(app);
 
-            _container.Register<ICommandHandler<SubmitYourQuestion>, SubmitYourQuestionCommandHandler>();
-            _container.Register<IQueryHandler<GetYourQuestion, string>, GetYourQuestionQueryHandler>();
+            Container.Register<ICommandHandler<SubmitYourQuestion>, SubmitYourQuestionCommandHandler>();
+            Container.Register<IQueryHandler<GetYourQuestion, string>, GetYourQuestionQueryHandler>();
             
-            _container.Register<AbstractStateMachine<State, Trigger>, DeepThoughtStateMachine>();
+            Container.Register<AbstractStateMachine<State, Trigger>, DeepThoughtStateMachine>();
 
-            _container.RegisterDecorator(typeof(ICommandHandler<>), typeof(VerboseLoggingCommandHandlerDecorator<>));
-
-            _container.Register<DeepThoughtStates>();
-            _container.Register<DeepThoughtTrigger>();
+            Container.RegisterDecorator(typeof(ICommandHandler<>), typeof(VerboseLoggingCommandHandlerDecorator<>));
 
             var assembly = GetType().Assembly;
             RegisterScopedCollection<State>(assembly);
             RegisterScopedCollection<Trigger>(assembly);
 
-            _container.Register<StateContext>();
-            _container.Register<TriggerContext>();
-            _container.Register<Specification<AnswerViewModel>, MeaningOfLifeSpecification>();
+            Container.Register<StateContext>();
+            Container.Register<TriggerContext>();
+            Container.Register<Specification<AnswerViewModel>, MeaningOfLifeSpecification>();
 
             // Allow Simple Injector to resolve services from ASP.NET Core.
-            _container.AutoCrossWireAspNetComponents(app);
+            Container.AutoCrossWireAspNetComponents(app);
         }
 
         private void RegisterScopedCollection<TType>(Assembly assembly)
         {
-            var registrationTypes = _container.GetTypesToRegister(typeof(TType), assembly);
+            var registrationTypes = Container.GetTypesToRegister(typeof(TType), assembly);
             foreach (var registrationType in registrationTypes)
             {
-                var registration = Lifestyle.Scoped.CreateRegistration(registrationType, _container);
-                _container.Collection.Append(typeof(TType), registration);
+                var registration = Lifestyle.Scoped.CreateRegistration(registrationType, Container);
+                Container.Collection.Append(typeof(TType), registration);
             }   
         }
     }

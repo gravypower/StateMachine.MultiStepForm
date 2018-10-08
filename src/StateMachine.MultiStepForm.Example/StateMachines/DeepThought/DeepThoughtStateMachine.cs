@@ -1,48 +1,39 @@
 ﻿using StateMachine.MultiStepForm.Contexts;
 using StateMachine.MultiStepForm.Example.Models.DeepThought;
-using StateMachine.MultiStepForm.Example.StateMachines.DeepThought.States;
-using StateMachine.MultiStepForm.Example.StateMachines.DeepThought.Triggers;
 
 namespace StateMachine.MultiStepForm.Example.StateMachines.DeepThought
 {
     public class DeepThoughtStateMachine : AbstractStateMachine<State, Trigger>
     {
-        private readonly DeepThoughtStates _states;
-        private readonly DeepThoughtTrigger _triggers;
-
-        public override State DefaultInitialState => _states.MeaningOfLife;
+        public override State DefaultInitialState => DeepThoughtStates.MeaningOfLife;
 
         public DeepThoughtStateMachine(
             StateContext stateContext,
-            TriggerContext triggerContext,
-            DeepThoughtStates states,
-            DeepThoughtTrigger triggers) : base(triggerContext, stateContext)
+            TriggerContext triggerContext) : base(triggerContext, stateContext)
         {
-            _states = states;
-            _triggers = triggers;
         }
 
         protected override void DoConfigureStateMachine()
         {
-            StateMachine.Configure(_states.MeaningOfLife)
-                .PermitIf(_triggers.AskDeepThought, _states.CorrectAnswer, _states.CorrectAnswer.IsCorrectAnswer)
-                .PermitIf(_triggers.AskDeepThought, _states.IncorrectAnswer, _states.CorrectAnswer.IsNotCorrectAnswer);
+            StateMachine.Configure(DeepThoughtStates.MeaningOfLife)
+                .PermitIf(DeepThoughtTrigger.AskDeepThought, DeepThoughtStates.CorrectAnswer, DeepThoughtStates.CorrectAnswer.IsCorrectAnswer)
+                .PermitIf(DeepThoughtTrigger.AskDeepThought, DeepThoughtStates.IncorrectAnswer, DeepThoughtStates.CorrectAnswer.IsNotCorrectAnswer);
 
-            StateMachine.Configure(_states.CorrectAnswer)
-                .Permit(_triggers.WhatIsTheQuestion, _states.QuestionToTheAnswer);
+            StateMachine.Configure(DeepThoughtStates.CorrectAnswer)
+                .Permit(DeepThoughtTrigger.WhatIsTheQuestion, DeepThoughtStates.QuestionToTheAnswer);
 
-            StateMachine.Configure(_states.IncorrectAnswer)
-                .Permit(_triggers.TryAgain, _states.MeaningOfLife)
-                .Permit(_triggers.WhatIsTheQuestion, _states.QuestionToTheAnswer);
+            StateMachine.Configure(DeepThoughtStates.IncorrectAnswer)
+                .Permit(DeepThoughtTrigger.TryAgain, DeepThoughtStates.MeaningOfLife)
+                .Permit(DeepThoughtTrigger.WhatIsTheQuestion, DeepThoughtStates.QuestionToTheAnswer);
 
-            StateMachine.Configure(_states.QuestionToTheAnswer)
-                .Permit(_triggers.YourQuestionToTheAnswer, _states.SoLongAndThanksForAllTheFish);
+            StateMachine.Configure(DeepThoughtStates.QuestionToTheAnswer)
+                .Permit(DeepThoughtTrigger.YourQuestionToTheAnswer, DeepThoughtStates.SoLongAndThanksForAllTheFish);
 
-            var yourQuestionToTheAnswerTrigger = SetTriggerParameters<QuestionViewModel>(_triggers.YourQuestionToTheAnswer);
+            var yourQuestionToTheAnswerTrigger = SetTriggerParameters<QuestionViewModel>(DeepThoughtTrigger.YourQuestionToTheAnswer);
             
-            StateMachine.Configure(_states.SoLongAndThanksForAllTheFish)
-                .OnEntryFrom(yourQuestionToTheAnswerTrigger, _triggers.YourQuestionToTheAnswer.YourAnswer)
-                .OnActivate(_states.SoLongAndThanksForAllTheFish.GetQuestion);
+            StateMachine.Configure(DeepThoughtStates.SoLongAndThanksForAllTheFish)
+                .OnEntryFrom(yourQuestionToTheAnswerTrigger, DeepThoughtTrigger.YourQuestionToTheAnswer.YourAnswer)
+                .OnActivate(DeepThoughtStates.SoLongAndThanksForAllTheFish.GetQuestion);
         }       
     }
 }
