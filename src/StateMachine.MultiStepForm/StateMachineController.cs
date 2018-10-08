@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Collections.Generic;
 using System.Linq;
+using StateMachine.MultiStepForm.Contexts;
 
 namespace StateMachine.MultiStepForm
 {
@@ -10,6 +11,7 @@ namespace StateMachine.MultiStepForm
         where TTrigger : Trigger
         where TState : State
     {
+        private readonly StateContext _stateContext;
         private readonly IEnumerable<State> _states;
         private readonly IEnumerable<Trigger> _triggers;
         private const string StateKey = "stateToken";
@@ -19,10 +21,12 @@ namespace StateMachine.MultiStepForm
         protected TState State => GetState();
 
         protected StateMachineController(
+            StateContext stateContext,
             IEnumerable<State> states,
             IEnumerable<Trigger> triggers,
             AbstractStateMachine<TState, TTrigger> stateMachine)
         {
+            _stateContext = stateContext;
             _states = states;
             _triggers = triggers;
             StateMachine = stateMachine;
@@ -38,7 +42,7 @@ namespace StateMachine.MultiStepForm
             ViewBag.State = stateToken;
 
             var state = StateMachine.CurrentState.GetType().Name;
-            var model = StateMachine.GetModel(StateMachine.CurrentState);
+            var model = _stateContext.GetModel(StateMachine.CurrentState);
             return model == null ? View(state) : View(state, model);
         }
 

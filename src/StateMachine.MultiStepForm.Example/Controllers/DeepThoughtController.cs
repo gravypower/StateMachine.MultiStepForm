@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
+using StateMachine.MultiStepForm.Contexts;
 using StateMachine.MultiStepForm.Example.Models.DeepThought;
 
 namespace StateMachine.MultiStepForm.Example.Controllers
@@ -7,10 +8,11 @@ namespace StateMachine.MultiStepForm.Example.Controllers
     public class DeepThoughtController : StateMachineController<State, Trigger>
     {
         public DeepThoughtController(
+            StateContext stateContext,
             IEnumerable<State> states,
             IEnumerable<Trigger> triggers,
             AbstractStateMachine<State, Trigger> stateMachine
-            ) : base(states, triggers, stateMachine)
+            ) : base(stateContext, states, triggers, stateMachine)
         {
         }
 

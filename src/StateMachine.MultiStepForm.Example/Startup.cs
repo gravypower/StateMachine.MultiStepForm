@@ -7,8 +7,10 @@ using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleInjector;
+using SimpleInjector.Integration.AspNetCore;
 using SimpleInjector.Integration.AspNetCore.Mvc;
 using SimpleInjector.Lifestyles;
+using StateMachine.MultiStepForm.Contexts;
 using StateMachine.MultiStepForm.Example.Commands;
 using StateMachine.MultiStepForm.Example.Commands.DeepThought;
 using StateMachine.MultiStepForm.Example.CrossCuttingConcerns;
@@ -120,6 +122,9 @@ namespace StateMachine.MultiStepForm.Example
 
             _container.Collection.Register<Trigger>(assembly);
             _container.Collection.Register<State>(assembly);
+
+            _container.Register<StateContext>();
+            _container.Register<TriggerContext>();
 
             // Allow Simple Injector to resolve services from ASP.NET Core.
             _container.AutoCrossWireAspNetComponents(app);
