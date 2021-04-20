@@ -9,7 +9,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Runtime" Version="2.2.0" />
-    <PackageReference Include="Stateless" Version="5.1.2" />
+    <PackageReference Include="Stateless" Version="5.10.1" />
   </ItemGroup>
 
 </Project>
